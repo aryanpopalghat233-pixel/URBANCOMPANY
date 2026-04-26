@@ -168,4 +168,10 @@ app.put('/api/worker/booking-status/:id', async (req, res) => {
     } catch (err) {
         res.status(400).json({ error: err.message });
     }
+    // This tells the app to use Render's port, OR 3000 if running locally
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+    console.log(`🚀 Server is running on port ${PORT}`);
+});
 });
