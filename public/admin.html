@@ -1,21 +1,39 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>URBANSERVICE - Admin Dashboard</title>
-    <link rel="stylesheet" href="css/style.css">
     <style>
-        .admin-container { padding: 30px; font-family: sans-serif; }
-        .card { border: 1px solid #ccc; padding: 20px; border-radius: 8px; max-width: 500px; }
-        input, select { width: 100%; padding: 10px; margin: 10px 0; }
-        button { background: #28a745; color: white; border: none; padding: 10px 20px; cursor: pointer; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f4f7f6; margin: 0; padding: 20px; }
+        .admin-container { max-width: 1000px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        h1, h2 { color: #333; }
+        
+        /* Form Styling */
+        .card { background: #f9f9f9; padding: 20px; border-radius: 8px; margin-bottom: 40px; border-left: 5px solid #28a745; }
+        input, select { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        button { background: #28a745; color: white; border: none; padding: 12px 20px; border-radius: 5px; cursor: pointer; font-size: 16px; }
+        button:hover { background: #218838; }
+
+        /* Table Styling */
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { text-align: left; padding: 12px; border-bottom: 1px solid #ddd; }
+        th { background-color: #007bff; color: white; }
+        tr:hover { background-color: #f1f1f1; }
+        
+        /* Status Badges */
+        .status { padding: 5px 10px; border-radius: 20px; font-size: 0.85em; font-weight: bold; }
+        .status.pending { background: #fff3cd; color: #856404; }
+        .status.accepted { background: #d4edda; color: #155724; }
+        .status.completed { background: #cce5ff; color: #004085; }
     </style>
 </head>
 <body>
     <div class="admin-container">
-        <h1>Admin Dashboard</h1>
+        <h1>URBANSERVICE Control Center</h1>
         
         <div class="card">
-            <h3>Add New Worker</h3>
+            <h2>Add New Worker</h2>
             <form id="addWorkerForm">
                 <input type="text" id="name" placeholder="Worker Name" required>
                 <input type="text" id="phone" placeholder="Phone Number" required>
@@ -25,18 +43,31 @@
                     <option value="Appliance Repair">Appliance Repair</option>
                     <option value="Home Repairs">Home Repairs</option>
                 </select>
-                <input type="text" id="subServices" placeholder="Sub-services (comma separated)">
+                <input type="text" id="subServices" placeholder="Sub-services (e.g., AC Repair, Fridge Repair)">
                 <input type="number" id="rating" placeholder="Initial Rating (1-5)" step="0.1">
                 <button type="submit">Register Worker</button>
             </form>
         </div>
 
-        <h2>Current Booking Records</h2>
-        <div id="bookingList">No bookings yet.</div>
+        <h2>Global Service Records</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Customer Name</th>
+                    <th>Service Requested</th>
+                    <th>Assigned Worker</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody id="recordsBody">
+                <tr><td colspan="5" style="text-align: center;">Loading records...</td></tr>
+            </tbody>
+        </table>
     </div>
 
     <script>
-        // Handle Form Submission
+        // --- 1. Handle Adding a New Worker ---
         document.getElementById('addWorkerForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -44,7 +75,7 @@
                 name: document.getElementById('name').value,
                 phone: document.getElementById('phone').value,
                 category: document.getElementById('category').value,
-                subServices: document.getElementById('subServices').value.split(','),
+                subServices: document.getElementById('subServices').value.split(',').map(s => s.trim()),
                 rating: document.getElementById('rating').value || 4.5
             };
 
@@ -56,7 +87,53 @@
 
             const result = await response.json();
             alert(result.message || result.error);
+            e.target.reset(); // Clear the form
         });
+
+        // --- 2. Load Global Records into the Table ---
+        async function loadGlobalRecords() {
+            try {
+                const response = await fetch('/api/admin/bookings');
+                const bookings = await response.json();
+                
+                const tableBody = document.getElementById('recordsBody');
+                tableBody.innerHTML = ''; // Clear loading text
+
+                if (bookings.length === 0) {
+                    tableBody.innerHTML = '<tr><td colspan="5" style="text-align: center;">No services booked yet.</td></tr>';
+                    return;
+                }
+
+                bookings.forEach(booking => {
+                    // Create a new row for each booking
+                    const row = document.createElement('tr');
+                    
+                    // Format the date to look nice
+                    const dateObj = new Date(booking.createdAt || booking.scheduledTime || Date.now());
+                    const formattedDate = dateObj.toLocaleDateString() + ' ' + dateObj.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+
+                    // Determine CSS class for the status badge
+                    let statusClass = 'pending';
+                    if (booking.status.toLowerCase() === 'accepted' || booking.status.toLowerCase() === 'in progress') statusClass = 'accepted';
+                    if (booking.status.toLowerCase() === 'completed') statusClass = 'completed';
+
+                    row.innerHTML = `
+                        <td>${formattedDate}</td>
+                        <td><strong>${booking.customerName}</strong></td>
+                        <td>${booking.serviceType}</td>
+                        <td>${booking.workerId ? booking.workerId.name : '<em>Unassigned</em>'}</td>
+                        <td><span class="status ${statusClass}">${booking.status}</span></td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            } catch (err) {
+                console.error("Error loading records:", err);
+                document.getElementById('recordsBody').innerHTML = '<tr><td colspan="5" style="text-align: center; color: red;">Error loading records. Is the server running?</td></tr>';
+            }
+        }
+
+        // Run the function to load records as soon as the page opens
+        loadGlobalRecords();
     </script>
 </body>
 </html>
