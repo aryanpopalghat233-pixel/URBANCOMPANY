@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>URBANSERVICE - Admin Dashboard</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .admin-container { padding: 30px; font-family: sans-serif; }
+        .card { border: 1px solid #ccc; padding: 20px; border-radius: 8px; max-width: 500px; }
+        input, select { width: 100%; padding: 10px; margin: 10px 0; }
+        button { background: #28a745; color: white; border: none; padding: 10px 20px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <h1>Admin Dashboard</h1>
+        
+        <div class="card">
+            <h3>Add New Worker</h3>
+            <form id="addWorkerForm">
+                <input type="text" id="name" placeholder="Worker Name" required>
+                <input type="text" id="phone" placeholder="Phone Number" required>
+                <select id="category">
+                    <option value="Beauty and Spa">Beauty and Spa</option>
+                    <option value="Cleaning and Pest Control">Cleaning and Pest Control</option>
+                    <option value="Appliance Repair">Appliance Repair</option>
+                    <option value="Home Repairs">Home Repairs</option>
+                </select>
+                <input type="text" id="subServices" placeholder="Sub-services (comma separated)">
+                <input type="number" id="rating" placeholder="Initial Rating (1-5)" step="0.1">
+                <button type="submit">Register Worker</button>
+            </form>
+        </div>
+
+        <h2>Current Booking Records</h2>
+        <div id="bookingList">No bookings yet.</div>
+    </div>
+
+    <script>
+        // Handle Form Submission
+        document.getElementById('addWorkerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const workerData = {
+                name: document.getElementById('name').value,
+                phone: document.getElementById('phone').value,
+                category: document.getElementById('category').value,
+                subServices: document.getElementById('subServices').value.split(','),
+                rating: document.getElementById('rating').value || 4.5
+            };
+
+            const response = await fetch('/api/admin/add-worker', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(workerData)
+            });
+
+            const result = await response.json();
+            alert(result.message || result.error);
+        });
+    </script>
+</body>
+</html>
