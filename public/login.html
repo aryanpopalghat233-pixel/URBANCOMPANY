@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>URBANSERVICE - Login</title>
+    <style>
+        body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; background: #f0f2f5; }
+        .auth-card { background: white; padding: 40px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: 350px; }
+        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        .toggle-text { text-align: center; margin-top: 15px; cursor: pointer; color: #007bff; font-size: 0.9em; }
+    </style>
+</head>
+<body>
+
+    <div class="auth-card">
+        <h2 id="formTitle">Customer Login</h2>
+        <form id="authForm">
+            <input type="text" id="userName" placeholder="Full Name" style="display: none;">
+            <input type="email" id="email" placeholder="Email Address" required>
+            <input type="password" id="password" placeholder="Password" required>
+            <button type="submit" id="submitBtn">Login</button>
+        </form>
+        <p class="toggle-text" id="toggleMode">Don't have an account? Sign up</p>
+    </div>
+
+    <script>
+        let isLogin = true;
+        const toggleBtn = document.getElementById('toggleMode');
+        const formTitle = document.getElementById('formTitle');
+        const nameInput = document.getElementById('userName');
+        const submitBtn = document.getElementById('submitBtn');
+
+        toggleBtn.addEventListener('click', () => {
+            isLogin = !isLogin;
+            formTitle.innerText = isLogin ? "Customer Login" : "Create Account";
+            submitBtn.innerText = isLogin ? "Login" : "Sign Up";
+            nameInput.style.display = isLogin ? "none" : "block";
+            toggleBtn.innerText = isLogin ? "Don't have an account? Sign up" : "Already have an account? Login";
+        });
+
+        document.getElementById('authForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const endpoint = isLogin ? '/api/auth/login' : '/api/auth/signup';
+            const payload = {
+                email: document.getElementById('email').value,
+                password: document.getElementById('password').value
+            };
+            if (!isLogin) payload.name = nameInput.value;
+
+            const response = await fetch(endpoint, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            const data = await response.json();
+            if (response.ok) {
+                if (isLogin) {
+                    // Save the secure token in the browser's memory
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('userName', data.user.name);
+                    alert("Welcome, " + data.user.name);
+                    window.location.href = 'index.html'; // Redirect to home
+                } else {
+                    alert("Account created! Please login.");
+                    location.reload();
+                }
+            } else {
+                alert(data.message || "Something went wrong");
+            }
+        });
+    </script>
+</body>
+</html>
