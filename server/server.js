@@ -8,10 +8,11 @@ require('dotenv').config();
 
 const app = express();
 
-// --- MODELS ---
-const Worker = require('../models/Worker');
-const Booking = require('../models/Booking');
-const User = require('../models/User');
+// server/server.js
+
+const Worker = require('../models/worker');   
+const Booking = require('../models/booking'); 
+const User = require('../models/user');       
 
 // --- MIDDLEWARE ---
 app.use(express.json());
