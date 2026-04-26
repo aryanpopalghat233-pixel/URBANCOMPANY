@@ -190,14 +190,45 @@
         let capturedCoords = null;
 
         // 2. Capture Location for Form
-        function captureLocation() {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(pos => {
-                    capturedCoords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-                    document.getElementById('locStatus').innerText = `✅ Verified: ${capturedCoords.lat.toFixed(4)}, ${capturedCoords.lng.toFixed(4)}`;
-                    document.getElementById('locStatus').style.color = "#16a34a";
-                    map.setView([capturedCoords.lat, capturedCoords.lng], 15);
-                    L.marker([capturedCoords.lat, capturedCoords.lng]).addTo(map).bindPopup("Your Work Base").openPopup();
+       function captureLocation() {
+    if (navigator.geolocation) {
+        // Adding options for High Accuracy
+        const options = {
+            enableHighAccuracy: true, 
+            timeout: 5000,
+            maximumAge: 0
+        };
+
+        document.getElementById('locStatus').innerText = "🛰️ Accessing GPS...";
+
+        navigator.geolocation.getCurrentPosition(
+            (pos) => {
+                capturedCoords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+                
+                // 1. Update the status text
+                document.getElementById('locStatus').innerText = `✅ Verified: ${capturedCoords.lat.toFixed(4)}, ${capturedCoords.lng.toFixed(4)}`;
+                document.getElementById('locStatus').style.color = "#16a34a";
+                
+                // 2. Move the map to the NEW location
+                map.setView([capturedCoords.lat, capturedCoords.lng], 16); 
+
+                // 3. Clear old markers and add a new one at the exact spot
+                L.marker([capturedCoords.lat, capturedCoords.lng])
+                    .addTo(map)
+                    .bindPopup("Your Exact Work Base")
+                    .openPopup();
+            },
+            (err) => {
+                console.error(err);
+                alert("Location Error: Please ensure Location Services are enabled in your browser/phone settings.");
+                document.getElementById('locStatus').innerText = "❌ Location Access Denied";
+            },
+            options // Pass the high accuracy options here
+        );
+    } else {
+        alert("Geolocation is not supported by this browser.");
+    }
+}
                 });
             }
         }
