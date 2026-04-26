@@ -70,3 +70,16 @@ app.put('/api/admin/worker/:id', async (req, res) => {
 app.listen(PORT, () => {
     console.log(`🚀 Server is running on http://localhost:${PORT}`);
 });
+// CUSTOMER ROUTE: Get workers by category
+app.get('/api/workers/category/:catName', async (req, res) => {
+    try {
+        // This looks in the database for workers matching the category clicked
+        const workers = await Worker.find({ 
+            category: req.params.catName,
+            isAvailable: true 
+        });
+        res.json(workers);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
