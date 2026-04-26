@@ -145,5 +145,27 @@ app.get('/api/workers/nearby', async (req, res) => {
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
+    // WORKER ROUTE: Get bookings for a specific worker
+app.get('/api/worker/bookings/:workerId', async (req, res) => {
+    try {
+        const tasks = await Booking.find({ workerId: req.params.workerId })
+            .sort({ createdAt: -1 }); // Show newest first
+        res.json(tasks);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
 });
+
+// WORKER ROUTE: Update booking status (e.g., "Accepted" or "Completed")
+app.put('/api/worker/booking-status/:id', async (req, res) => {
+    try {
+        const updatedBooking = await Booking.findByIdAndUpdate(
+            req.params.id, 
+            { status: req.body.status }, 
+            { new: true }
+        );
+        res.json(updatedBooking);
+    } catch (err) {
+        res.status(400).json({ error: err.message });
+    }
 });
