@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>URBANSERVICE - Book Home Services</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; }
+        .tabs { display: flex; gap: 10px; margin-bottom: 20px; }
+        .tab { padding: 10px 20px; background: #eee; cursor: pointer; border-radius: 5px; }
+        .tab:hover { background: #ddd; }
+        #map { height: 400px; width: 100%; border-radius: 8px; margin-top: 20px; }
+    </style>
+</head>
+<body>
+
+    <h1>Welcome to URBANSERVICE</h1>
+    
+    <div class="tabs">
+        <div class="tab">Beauty & Spa</div>
+        <div class="tab">Cleaning & Pest Control</div>
+        <div class="tab">Appliance Repair</div>
+        <div class="tab">Home Repairs</div>
+    </div>
+
+    <div id="services-container">
+        <p>Select a category above to see available services and prices.</p>
+    </div>
+
+    <h2>Live Worker Tracking</h2>
+    <div id="map"></div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        // Initialize the map centered on a default location
+        var map = L.map('map').setView([28.6139, 77.2090], 13); // Default: New Delhi coordinates
+
+        // Load map tiles from OpenStreetMap
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '© OpenStreetMap'
+        }).addTo(map);
+
+        // Add a sample marker for a worker
+        var workerMarker = L.marker([28.6139, 77.2090]).addTo(map)
+            .bindPopup('Worker: John Doe<br>ETA: 15 mins')
+            .openPopup();
+    </script>
+</body>
+</html>
