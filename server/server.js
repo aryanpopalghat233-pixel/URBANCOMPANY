@@ -34,6 +34,39 @@ app.get('/api/status', (req, res) => {
 
 // Start the server
 const PORT = process.env.PORT || 3000;
+const Worker = require('./models/Worker');
+const Booking = require('./models/Booking');
+
+// ADMIN ROUTE: Add a new worker
+app.post('/api/admin/add-worker', async (req, res) => {
+    try {
+        const newWorker = new Worker(req.body);
+        await newWorker.save();
+        res.status(201).json({ message: "Worker added successfully!" });
+    } catch (err) {
+        res.status(400).json({ error: err.message });
+    }
+});
+
+// ADMIN ROUTE: Get all bookings to show on the dashboard
+app.get('/api/admin/bookings', async (req, res) => {
+    try {
+        const bookings = await Booking.find().populate('workerId');
+        res.json(bookings);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// ADMIN ROUTE: Update worker rating or availability
+app.put('/api/admin/worker/:id', async (req, res) => {
+    try {
+        const updatedWorker = await Worker.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        res.json(updatedWorker);
+    } catch (err) {
+        res.status(400).json({ error: err.message });
+    }
+});
 app.listen(PORT, () => {
     console.log(`🚀 Server is running on http://localhost:${PORT}`);
 });
