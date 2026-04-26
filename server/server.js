@@ -127,4 +127,23 @@ app.post('/api/auth/login', async (req, res) => {
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
+    // server/server.js update
+app.get('/api/workers/nearby', async (req, res) => {
+    const { lat, lng } = req.query;
+
+    try {
+        const nearbyWorkers = await Worker.find({
+            location: {
+                $near: {
+                    $geometry: { type: "Point", coordinates: [parseFloat(lng), parseFloat(lat)] },
+                    $maxDistance: 5000 // Distance in meters (5km)
+                }
+            },
+            isAvailable: true
+        });
+        res.json(nearbyWorkers);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
 });
