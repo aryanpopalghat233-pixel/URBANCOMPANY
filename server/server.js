@@ -10,9 +10,9 @@ const app = express();
 
 // server/server.js
 
-const Worker = require('../models/worker');   
-const Booking = require('../models/booking'); 
-const User = require('../models/user');       
+const Worker = require('./models/worker');   
+const Booking = require('./models/booking'); 
+const User = require('./models/user');       
 
 // --- MIDDLEWARE ---
 app.use(express.json());
