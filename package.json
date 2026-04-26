@@ -4,7 +4,7 @@
   "description": "Full-stack home service marketplace with real-time tracking",
   "main": "server/server.js",
   "scripts": {
-    "start": "node server/server.js",
+  "start": "node server/server.js",
     "dev": "nodemon server/server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
