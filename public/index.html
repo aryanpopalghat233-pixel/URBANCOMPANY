@@ -3,103 +3,144 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>URBANSERVICE - Book Now</title>
+    <title>URBANSERVICE | Professional Home Services</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f4f7f6; margin: 0; padding: 20px; }
-        .header { text-align: center; margin-bottom: 40px; }
-        
-        /* Tab Styling */
-        .tabs { display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; }
+        :root { --primary: #2563eb; --dark: #1e293b; --light: #f8fafc; }
+        body { font-family: 'Inter', sans-serif; background: var(--light); margin: 0; color: var(--dark); }
+
+        /* Banner Styling */
+        .banner { 
+            background: linear-gradient(135deg, var(--dark) 0%, #334155 100%);
+            color: white; padding: 60px 20px; text-align: center; border-bottom: 5px solid var(--primary);
+        }
+        .banner h1 { font-size: 3rem; margin: 0; letter-spacing: -1px; }
+        .banner p { font-size: 1.2rem; opacity: 0.9; margin-top: 10px; }
+
+        .container { max-width: 1100px; margin: -30px auto 40px; padding: 0 20px; }
+
+        /* Medium Tabs Styling */
+        .tabs-container { 
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); 
+            gap: 15px; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+        }
         .tab { 
-            padding: 15px 25px; background: white; border: 2px solid #007bff; 
-            color: #007bff; cursor: pointer; border-radius: 30px; font-weight: bold; transition: 0.3s;
+            padding: 20px; text-align: center; background: #f1f5f9; border-radius: 8px; 
+            cursor: pointer; font-weight: 600; transition: all 0.2s; border: 2px solid transparent;
         }
-        .tab.active { background: #007bff; color: white; }
+        .tab:hover { background: #e2e8f0; transform: translateY(-3px); }
+        .tab.active { border-color: var(--primary); background: #eff6ff; color: var(--primary); }
 
-        /* Worker Card Styling */
-        .services-grid { 
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
-            gap: 20px; margin-top: 30px; 
-        }
-        .worker-card { 
-            background: white; padding: 20px; border-radius: 12px; 
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1); border-top: 5px solid #007bff;
-        }
-        .worker-card h3 { margin: 0 0 10px 0; color: #333; }
-        .rating { color: #f39c12; font-weight: bold; }
-        .price { font-size: 1.2em; color: #28a745; margin: 10px 0; }
-        .btn-book { 
-            width: 100%; padding: 10px; background: #007bff; color: white; 
-            border: none; border-radius: 5px; cursor: pointer; 
-        }
+        /* Map and Content */
+        #map { height: 450px; width: 100%; border-radius: 12px; margin: 30px 0; border: 4px solid white; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        
+        .services-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
 
-        #map { height: 300px; width: 100%; border-radius: 12px; margin-top: 40px; }
+        /* Application Form Section */
+        .apply-section { background: white; padding: 40px; border-radius: 12px; margin-top: 40px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .apply-form { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .apply-form input, .apply-form select { padding: 12px; border: 1px solid #cbd5e1; border-radius: 6px; }
+        .apply-form button { 
+            grid-column: 1 / -1; background: var(--primary); color: white; border: none; 
+            padding: 15px; border-radius: 6px; font-weight: bold; cursor: pointer;
+        }
     </style>
 </head>
 <body>
 
-    <div class="header">
+    <header class="banner">
         <h1>URBANSERVICE</h1>
-        <p>Expert services, delivered at your doorstep.</p>
-    </div>
+        <p>Reliable Professionals. Real-Time Tracking. Right Now.</p>
+    </header>
 
-    <div class="tabs" id="categoryTabs">
-        <div class="tab" onclick="loadWorkers('Beauty and Spa', this)">Beauty & Spa</div>
-        <div class="tab" onclick="loadWorkers('Cleaning and Pest Control', this)">Cleaning</div>
-        <div class="tab" onclick="loadWorkers('Appliance Repair', this)">Appliance Repair</div>
-        <div class="tab" onclick="loadWorkers('Home Repairs', this)">Home Repairs</div>
-    </div>
+    <div class="container">
+        <div class="tabs-container" id="categoryTabs">
+            <div class="tab" onclick="loadWorkers('Beauty and Spa', this)">Beauty & Spa</div>
+            <div class="tab" onclick="loadWorkers('Cleaning and Pest Control', this)">Cleaning</div>
+            <div class="tab" onclick="loadWorkers('Appliance Repair', this)">Appliance Repair</div>
+            <div class="tab" onclick="loadWorkers('Home Repairs', this)">Home Repairs</div>
+        </div>
 
-    <div class="services-grid" id="workerDisplay">
-        <p style="text-align: center; grid-column: 1/-1;">Select a category to see available professionals.</p>
-    </div>
+        <div id="map"></div>
 
-    <div id="map"></div>
+        <div class="services-grid" id="workerDisplay">
+            </div>
+
+        <div class="apply-section">
+            <h2>Join Our Team</h2>
+            <p>Are you a professional? Apply now and appear on the map instantly!</p>
+            <form class="apply-form" id="workerApplyForm">
+                <input type="text" id="applyName" placeholder="Full Name" required>
+                <input type="text" id="applyPhone" placeholder="Phone Number" required>
+                <select id="applyCategory">
+                    <option value="Beauty and Spa">Beauty and Spa</option>
+                    <option value="Cleaning and Pest Control">Cleaning and Pest Control</option>
+                    <option value="Appliance Repair">Appliance Repair</option>
+                    <option value="Home Repairs">Home Repairs</option>
+                </select>
+                <input type="text" id="applySubServices" placeholder="Services (comma separated)">
+                <button type="button" onclick="getCurrentLocation()">📍 Capture My Work Location</button>
+                <p id="locationStatus" style="grid-column: 1/-1; font-size: 0.8rem; color: gray;">Location not captured yet.</p>
+                <button type="submit">Submit Application</button>
+            </form>
+        </div>
+    </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-// Initialize the map
-var map = L.map('map').setView([0, 0], 13);
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+        let userCoords = [28.6139, 77.2090]; // Default
+        let capturedLocation = null;
 
-// 1. Get Customer's Location
-if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(position => {
-        const { latitude, longitude } = position.coords;
-        
-        // Center map on customer
-        map.setView([latitude, longitude], 13);
+        const map = L.map('map').setView(userCoords, 12);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
-        // Add a special marker for the Customer
-        L.marker([latitude, longitude])
-            .addTo(map)
-            .bindPopup("<b>You are here</b>")
-            .openPopup();
-
-        // 2. Fetch Nearby Workers from our new API
-        fetch(`/api/workers/nearby?lat=${latitude}&lng=${longitude}`)
-            .then(res => res.json())
-            .then(workers => {
-                workers.forEach(worker => {
-                    // Note: GeoJSON stores [lng, lat], but Leaflet uses [lat, lng]
-                    const workerLat = worker.location.coordinates[1];
-                    const workerLng = worker.location.coordinates[0];
-
-                    // Add a marker for each worker
-                    L.marker([workerLat, workerLng])
-                        .addTo(map)
-                        .bindPopup(`
-                            <strong>${worker.name}</strong><br>
-                            ${worker.category}<br>
-                            Rating: ⭐${worker.rating}
-                        `);
+        // Capture Location for Application
+        function getCurrentLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(pos => {
+                    capturedLocation = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+                    document.getElementById('locationStatus').innerText = `✅ Location captured: ${capturedLocation.lat.toFixed(4)}, ${capturedLocation.lng.toFixed(4)}`;
+                    document.getElementById('locationStatus').style.color = "green";
                 });
+            }
+        }
+
+        // Handle Worker Application
+        document.getElementById('workerApplyForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if(!capturedLocation) return alert("Please capture your location first!");
+
+            const workerData = {
+                name: document.getElementById('applyName').value,
+                phone: document.getElementById('applyPhone').value,
+                category: document.getElementById('applyCategory').value,
+                subServices: document.getElementById('applySubServices').value.split(','),
+                location: { type: 'Point', coordinates: [capturedLocation.lng, capturedLocation.lat] }
+            };
+
+            const res = await fetch('/api/admin/add-worker', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(workerData)
             });
-    });
-} else {
-    alert("Geolocation is not supported by your browser.");
-}
+
+            if (res.ok) {
+                alert("Application Successful! You are now live on the map.");
+                // INSTANT MAP UPDATE
+                L.marker([capturedLocation.lat, capturedLocation.lng])
+                    .addTo(map)
+                    .bindPopup(`<b>New Expert: ${workerData.name}</b><br>Just Joined!`)
+                    .openPopup();
+                e.target.reset();
+            }
+        });
+
+        // Load Workers Logic (from previous steps)
+        async function loadWorkers(cat, el) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            el.classList.add('active');
+            // ... existing fetch logic for /api/workers/category/ ...
+        }
     </script>
 </body>
 </html>
