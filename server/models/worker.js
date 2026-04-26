@@ -1,18 +1,18 @@
 const mongoose = require('mongoose');
 
-// models/Worker.js update
 const workerSchema = new mongoose.Schema({
-    name: String,
-    category: String,
-    isAvailable: { type: Boolean, default: true },
-    // Use GeoJSON format for MongoDB geospatial queries
+    name: { type: String, required: true },
+    phone: { type: String, required: true }, // Ensure this matches 'phone' in your code
+    category: { type: String, required: true },
+    subServices: [String],
+    rating: { type: Number, default: 4.5 },
     location: {
         type: { type: String, default: 'Point' },
-        coordinates: { type: [Number], default: [0, 0] } // [longitude, latitude]
+        coordinates: { type: [Number], required: true } // [Longitude, Latitude]
     }
 });
 
-// This "index" tells MongoDB to treat this field like a map
+// Important: This allows the "nearby" search to work
 workerSchema.index({ location: "2dsphere" });
 
 module.exports = mongoose.model('Worker', workerSchema);
