@@ -104,6 +104,10 @@
         function bookService(id) {
             alert("Booking functionality coming next! Worker ID: " + id);
         }
+        const userName = localStorage.getItem('userName');
+if (userName) {
+    document.querySelector('.header p').innerText = `Hello, ${userName}! Find your expert service today.`;
+}
     </script>
 </body>
 </html>
