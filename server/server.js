@@ -1,36 +1,39 @@
+// Import the necessary packages
 const express = require('express');
 const mongoose = require('mongoose');
-const path = require('path');
-require('dotenv').config();
+const cors = require('cors');
+require('dotenv').config(); // Loads the variables from your .env file
 
+// Initialize the Express application
 const app = express();
+
+// Middleware to parse JSON and allow cross-origin requests
 app.use(express.json());
+app.use(cors());
 
-// Serve static files from the 'public' folder
-app.use(express.static(path.join(__dirname, '../public')));
+// The Connection Function
+const connectDB = async () => {
+    try {
+        // Attempt to connect to MongoDB using the URI from the .env file
+        await mongoose.connect(process.env.MONGO_URI);
+        console.log("✅ Successfully connected to MongoDB Atlas!");
+    } catch (error) {
+        console.error("❌ Database connection error:", error.message);
+        // Exit the process with failure if connection drops
+        process.exit(1); 
+    }
+};
 
-// Connect to MongoDB Atlas (You will put your URI in a .env file)
-mongoose.connect(process.env.MONGO_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-}).then(() => console.log("Connected to MongoDB Atlas"))
-  .catch(err => console.log("Database connection error:", err));
+// Execute the connection
+connectDB();
 
-// --- API ROUTES ---
-
-// Example: Get all available workers for a specific service
-app.get('/api/workers/:category', async (req, res) => {
-    // In the future, this will fetch from the database
-    res.json({ message: `Fetching workers for ${req.params.category}` });
+// A simple test route to ensure the server is responding
+app.get('/api/status', (req, res) => {
+    res.json({ message: "URBANSERVICE backend is live!" });
 });
 
-// Example: Create a new booking
-app.post('/api/bookings', async (req, res) => {
-    // Logic to save booking to database will go here
-    res.json({ message: "Booking created successfully!" });
-});
-
+// Start the server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
+    console.log(`🚀 Server is running on http://localhost:${PORT}`);
 });
