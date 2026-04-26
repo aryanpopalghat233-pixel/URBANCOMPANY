@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>URBANSERVICE - Worker Panel</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        body { font-family: sans-serif; display: flex; height: 100vh; margin: 0; }
+        #sidebar { width: 350px; background: #2c3e50; color: white; padding: 20px; overflow-y: auto; }
+        #map { flex-grow: 1; height: 100%; }
+        .booking-card { 
+            background: #34495e; border-radius: 8px; padding: 15px; margin-bottom: 15px; cursor: pointer; 
+            transition: 0.2s; border-left: 5px solid #3498db;
+        }
+        .booking-card:hover { background: #485e74; }
+        .status-badge { font-size: 0.8em; padding: 3px 8px; border-radius: 10px; background: #e67e22; }
+        button { background: #27ae60; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <div id="sidebar">
+        <h2>Service Requests</h2>
+        <div id="taskList">Loading jobs...</div>
+    </div>
+
+    <div id="map"></div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        // Initialize Map
+        var map = L.map('map').setView([28.6139, 77.2090], 12);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+        // Replace this with the actual logged-in Worker's ID from your database
+        const workerId = "REPLACE_WITH_REAL_WORKER_ID"; 
+
+        async function fetchJobs() {
+            const response = await fetch(`/api/worker/bookings/${workerId}`);
+            const bookings = await response.json();
+            const list = document.getElementById('taskList');
+            list.innerHTML = "";
+
+            bookings.forEach(booking => {
+                const card = document.createElement('div');
+                card.className = 'booking-card';
+                card.innerHTML = `
+                    <h4>${booking.serviceType}</h4>
+                    <p>Customer: ${booking.customerName}</p>
+                    <span class="status-badge">${booking.status}</span>
+                    <p><small>${new Date(booking.scheduledTime).toLocaleString()}</small></p>
+                    <button onclick="viewCustomer('${booking.customerLocation.lat}', '${booking.customerLocation.lng}', '${booking.customerName}')">
+                        Locate Customer
+                    </button>
+                `;
+                list.appendChild(card);
+            });
+        }
+
+        function viewCustomer(lat, lng, name) {
+            // Zoom to customer location
+            const customerCoords = [parseFloat(lat), parseFloat(lng)];
+            map.setView(customerCoords, 16);
+            
+            // Add marker for customer
+            L.marker(customerCoords).addTo(map)
+                .bindPopup(`<b>Customer: ${name}</b><br>Service Destination`)
+                .openPopup();
+        }
+
+        fetchJobs();
+    </script>
+</body>
+</html>
